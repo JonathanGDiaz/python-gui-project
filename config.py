@@ -1,4 +1,4 @@
 customColors = {
-    "EntryBG": "#E2E1E0",
+    "EntryBG": "#999997",
     "EntryFG": "#000000"
 }

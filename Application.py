@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from LogIn import LogIn
+from Dashboard import Dashboard
+from UserForm import UserForm
 
 
 class Application(tk.Tk):
@@ -9,17 +11,23 @@ class Application(tk.Tk):
         self.style = ttk.Style(self)
         self.tk.call("source", "forest-dark.tcl")
         self.style.theme_use("forest-dark")
-        self.geometry("500x500")
+        self.geometry("600x500")
         self.title("Chess tournament")
+        self.frames = {}
 
-        # Frames
-        self.logIn = LogIn(self)
-        self.logIn.place(relx=0.5, rely=0.5, anchor="center")
+        for F in (LogIn, Dashboard, UserForm):
+            frame = F(self)
+            self.frames[F.__name__] = frame
 
-        # self.logIn.grid(row=0, column=0, sticky="nsew")
+        self.showFrame("LogIn")
+        return
 
-        # First frame
-        self.show_frame(self.logIn)
+    def showFrame(self, name: str):
+        for frame in self.frames.values():
+            frame.place_forget()
+            frame.pack_forget()
 
-    def show_frame(self, frame):
-        frame.tkraise()
+        if isinstance(self.frames[name], LogIn):
+            self.frames[name].place(relx=0.5, rely=0.5, anchor="center")
+        else:
+            self.frames[name].pack(anchor=tk.CENTER)
