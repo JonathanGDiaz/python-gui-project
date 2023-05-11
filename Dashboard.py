@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk as tk
 
 
 class Dashboard (tk.Frame):
@@ -25,6 +26,14 @@ class Dashboard (tk.Frame):
             text="Log out", command=lambda: self.master.showFrame("LogIn"))
 
         self.render()
+        return
+
+    def pack(self, **kargs):
+        self.onFocus()
+        super().pack(**kargs)
+
+    def onFocus(self):
+        print('Se hizo focus al dashBoard')
         return
 
     def render(self):
