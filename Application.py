@@ -9,7 +9,7 @@ class Application(tk.Tk):
     def __init__(self):
         super().__init__()
         self.style = ttk.Style(self)
-        self.tk.call("source", "forest-dark.tcl")
+        self.tk.call("source", "assets/forest-dark.tcl")
         self.style.theme_use("forest-dark")
         self.geometry("600x500")
         self.title("Chess tournament")
