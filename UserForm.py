@@ -1,20 +1,25 @@
 import tkinter
+from tkinter import messagebox
 from tkinter import ttk as tk
+from Cursor import Cursor
 
 
 class UserForm(tkinter.Frame):
     def __init__(self, master):
         super().__init__(master)
         self.master = master
-
-        # Widgets
-        self.mainLabel = tk.Label(self)
-        self.goBackButton = tk.Button(self)
-        self.createButton = tk.Button(self)
+        self.tempContender = None
 
         # Sub frames
         self.userInfoFrame = tk.LabelFrame(self)
         self.categoryInfoFrame = tk.LabelFrame(self)
+        self.buttonsFrame = tk.Frame(self)
+
+        # Widgets
+        self.mainLabel = tk.Label(self)
+        self.goBackButton = tk.Button(self.buttonsFrame)
+        self.createButton = tk.Button(self.buttonsFrame)
+        self.deleteButton = tk.Button(self.buttonsFrame)
 
         # individual form components
         self.nameLabel = tk.Label(self.userInfoFrame)
@@ -51,8 +56,11 @@ class UserForm(tkinter.Frame):
         self.price = tkinter.StringVar()
         self.price.set("Category not selected")
 
+        self.cursor = Cursor()
+
         self.widgetsConfig()
 
+    # Config
     def widgetsConfig(self):
         self.userInfoFrame.configure(text="User information")
         self.categoryInfoFrame.configure(text="Category information")
@@ -61,7 +69,13 @@ class UserForm(tkinter.Frame):
             text="User form", font=("forest-dark", 30, "bold"))
 
         self.goBackButton.configure(
-            text="Go back", command=lambda: self.master.showFrame("Dashboard"))
+            text="Go back", command=self.onBlur)
+
+        self.createButton.configure(
+            text="Apply", command=self.dispatchContender)
+
+        self.deleteButton.configure(
+            text="Delete", command=self.deleteContender)
 
         self.nameLabel.configure(text="First name*")
 
@@ -70,11 +84,14 @@ class UserForm(tkinter.Frame):
         self.secondLastNameLabel.configure(text="Second last name")
 
         self.ageLabel.configure(text="Age*")
-        validate = self.register(self.validateAge)
+        ageValidation = self.register(self.validateAge)
         self.ageEntry.configure(validate="key", validatecommand=(
-            validate, "%S"))
+            ageValidation, "%P"))
 
         self.curpLabel.configure(text="Curp*")
+        self.curpValidation = self.register(self.validateCurp)
+        self.curpEntry.configure(
+            validate="key", validatecommand=(self.curpValidation, "%P"))
 
         self.genderLabel.configure(text="Gender*")
         self.genderComboBox.configure(
@@ -95,16 +112,118 @@ class UserForm(tkinter.Frame):
         self.render()
         return
 
+    # Queries
+    def dispatchContender(self):
+        contender = {
+            "name": self.nameEntry.get(),
+            "firstLastName": self.lastNameEntry.get(),
+            "secondLastName": self.secondLastNameEntry.get(),
+            "age": self.ageEntry.get(),
+            "curp": self.curpEntry.get(),
+            "gender": self.genderComboBox.get(),
+            "address": self.addressEntry.get(),
+            "school": self.schoolEntry.get(),
+            "category": self.categoryComboBox.get(),
+            "payment": self.price.get(),
+        }
+        response = None
+        message = ""
+        if (self.tempContender is None):
+            response = self.cursor.addContender(contender=contender)
+            message = "Contender added!"
+        else:
+            response = self.cursor.updateContender(
+                contender=contender, id=self.tempContender[0])
+            message = "Contender updated!"
+
+        if (response):
+            messagebox.showinfo(message=message)
+            self.nameEntry.delete(0, "end")
+            self.lastNameEntry.delete(0, "end")
+            self.secondLastNameEntry.delete(0, "end")
+            self.ageEntry.delete(0, "end")
+            self.curpEntry.delete(0, "end")
+            self.genderComboBox.delete(0, "end")
+            self.addressEntry.delete(0, "end")
+            self.schoolEntry.delete(0, "end")
+            self.categoryComboBox.delete(0, "end")
+            self.price.set("Category not selected")
+            self.master.showFrame("Dashboard")
+        else:
+            messagebox.showerror(message="There was an error!")
+
+        return
+
+    def deleteContender(self):
+        id = self.tempContender[0]
+        response = self.cursor.deleteContender(id)
+        if (response):
+            messagebox.showinfo(message="Contender deleted")
+            self.master.showFrame("Dashboard")
+        else:
+            messagebox.showinfo(message="An error ocurred!")
+
+    #  Validations
+
+    def validateAge(self, text: str):
+        if len(text) <= 2:
+            return text.isdigit() or text == ""
+        else:
+            return False
+
+    def validateCurp(self, text: str):
+        return len(text) <= 18
+
+    def onCategorySelection(self, e):
+        actions = {
+            "Advanced": lambda: self.price.set("500.00 MXN"),
+            "Intermediate": lambda: self.price.set("350.00 MXN"),
+            "Novice": lambda: self.price.set("250.00 MXN")
+        }
+
+        actions.get(self.categoryComboBox.get())()
+        return
+
+    # Render functions
+    def onBlur(self):
+        self.nameEntry.delete(0, "end")
+        self.lastNameEntry.delete(0, "end")
+        self.secondLastNameEntry.delete(0, "end")
+        self.ageEntry.delete(0, "end")
+        self.curpEntry.delete(0, "end")
+        self.genderComboBox.delete(0, "end")
+        self.addressEntry.delete(0, "end")
+        self.schoolEntry.delete(0, "end")
+        self.categoryComboBox.delete(0, "end")
+        self.price.set("Category not selected")
+        self.tempContender = None
+        self.master.showFrame("Dashboard")
+        return
+
     def pack(self, **kargs):
         self.onFocus()
         super().pack(**kargs)
 
     def onFocus(self):
-        print('Se hizo focus al userForm')
+        if (self.tempContender is None):
+            self.deleteButton.grid_forget()
+            return
+
+        self.deleteButton.grid(column=3, row=0, padx=5)
+        nameArr = self.tempContender[1].split()
+        self.nameEntry.insert(0, nameArr[0])
+        self.lastNameEntry.insert(0, nameArr[1])
+        self.secondLastNameEntry.insert(0, nameArr[2])
+        self.ageEntry.insert(0, self.tempContender[2])
+        self.curpEntry.insert(0, self.tempContender[3])
+        self.genderComboBox.insert(0, self.tempContender[4])
+        self.addressEntry.insert(0, self.tempContender[5])
+        self.schoolEntry.insert(0, self.tempContender[6])
+        self.categoryComboBox.insert(0, self.tempContender[7])
+        self.price.set(f"{self.tempContender[8]}0 MXN")
         return
 
     def render(self):
-        # User info sub-frame
         self.nameLabel.grid(column=0, row=0)
         self.nameEntry.grid(column=0, row=1)
 
@@ -140,21 +259,11 @@ class UserForm(tkinter.Frame):
         for widget in self.categoryInfoFrame.winfo_children():
             widget.grid_configure(padx=5)
 
+        self.goBackButton.grid(column=0, row=0, padx=5)
+        self.createButton.grid(column=1, row=0, padx=5)
+
         self.mainLabel.pack()
         self.userInfoFrame.pack(ipadx=50, ipady=7, padx=10, pady=10)
         self.categoryInfoFrame.pack(ipadx=50, ipady=7, padx=10, pady=10)
-        self.goBackButton.pack()
-        return
-
-    def validateAge(self, text: str):
-        return text.isdigit() or text == ""
-
-    def onCategorySelection(self, e):
-        actions = {
-            "Advanced": lambda: self.price.set("500.00 MXN"),
-            "Intermediate": lambda: self.price.set("350.00 MXN"),
-            "Novice": lambda: self.price.set("250.00 MXN")
-        }
-
-        actions.get(self.categoryComboBox.get())()
+        self.buttonsFrame.pack()
         return

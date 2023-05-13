@@ -37,21 +37,21 @@ class LogIn(tkinter.Frame):
         return
 
     def logIn(self):
-        credentials = {
-            "email": self.emailEntry.get(),
-            "password": self.passwordEntry.get()
-        }
-        response = self.cursor.logIn(credentials=credentials)
-        if response:
-            self.emailEntry.delete(0, "end")
-            self.passwordEntry.delete(0, "end")
-            self.emailEntry.insert(0, self.emailEntry.placeHolder)
-            self.passwordEntry.insert(0, self.passwordEntry.placeHolder)
-            self.passwordEntry.configure(show="")
-            self.master.showFrame("Dashboard")
-        else:
-            messagebox.showerror(message="The email or password is wrong")
-        pass
+        # credentials = {
+        #     "email": self.emailEntry.get(),
+        #     "password": self.passwordEntry.get()
+        # }
+        # response = self.cursor.logIn(credentials=credentials)
+        # if response:
+        #     self.emailEntry.delete(0, "end")
+        #     self.passwordEntry.delete(0, "end")
+        #     self.emailEntry.insert(0, self.emailEntry.placeHolder)
+        #     self.passwordEntry.insert(0, self.passwordEntry.placeHolder)
+        #     self.passwordEntry.configure(show="")
+        self.master.showFrame("Dashboard")
+        # else:
+        #     messagebox.showerror(message="The email or password is wrong")
+        return
 
     def render(self):
         self.imageLabel.grid(column=0, row=0, columnspan=2)
