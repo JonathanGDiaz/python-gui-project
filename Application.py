@@ -3,6 +3,7 @@ from tkinter import ttk
 from LogIn import LogIn
 from Dashboard import Dashboard
 from UserForm import UserForm
+from Winners import Winners
 
 
 class Application(tk.Tk):
@@ -15,7 +16,7 @@ class Application(tk.Tk):
         self.title("Chess tournament")
         self.frames = {}
 
-        for F in (LogIn, Dashboard, UserForm):
+        for F in (LogIn, Dashboard, UserForm, Winners):
             frame = F(self)
             self.frames[F.__name__] = frame
 

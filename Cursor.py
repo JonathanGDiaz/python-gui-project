@@ -92,7 +92,9 @@ class Cursor ():
             conn = self.createConnection()
             cursor = conn.cursor()
             cursor.execute(getContendersQuery)
-            return cursor.fetchall()
+            result =  cursor.fetchall()
+            conn.close()
+            return result
         except Exception as ex:
             print(ex)
 
@@ -100,7 +102,6 @@ class Cursor ():
         deleteContenderQuery = f'''
         DELETE FROM contenders WHERE id = {id}
         '''
-        print(id)
         try:
             conn = self.createConnection()
             cursor = conn.cursor()
@@ -108,6 +109,42 @@ class Cursor ():
             conn.commit()
             conn.close()
             return True
+        except Exception as ex:
+            print(ex)
+            return False
+
+    def searchContender(self, query):
+        searchQuery = f'''
+        SELECT * FROM contenders WHERE name LIKE ?
+        '''
+        try:
+            conn = self.createConnection()
+            cursor = conn.cursor()
+            cursor.execute(searchQuery, ("%" + query + "%",))
+            result = cursor.fetchall()
+            conn.close()
+            return result
+        except Exception as ex:
+            print(ex)
+            return False
+    
+    def filterContenders(self, query, filter="Novice"):
+        try:
+            conn = self.createConnection()
+            cursor = conn.cursor()
+            if query is None:
+                filterQuery = f'''
+                SELECT * FROM contenders WHERE category = "{filter}"
+                '''
+                cursor.execute(filterQuery)
+            else:
+                filterQuery = f'''
+                SELECT * FROM contenders WHERE name LIKE ? AND category = "{filter}"
+                '''
+                cursor.execute(filterQuery, ("%" + query + "%",))
+            result = cursor.fetchall()
+            conn.close()
+            return result
         except Exception as ex:
             print(ex)
             return False

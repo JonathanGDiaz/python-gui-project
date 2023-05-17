@@ -2,6 +2,7 @@ import tkinter
 from tkinter import messagebox
 from tkinter import ttk as tk
 from Cursor import Cursor
+from Document import Document
 
 
 class UserForm(tkinter.Frame):
@@ -9,6 +10,8 @@ class UserForm(tkinter.Frame):
         super().__init__(master)
         self.master = master
         self.tempContender = None
+        self.docMaker = Document()
+        self.createButtonText = tkinter.StringVar()
 
         # Sub frames
         self.userInfoFrame = tk.LabelFrame(self)
@@ -72,7 +75,7 @@ class UserForm(tkinter.Frame):
             text="Go back", command=self.onBlur)
 
         self.createButton.configure(
-            text="Apply", command=self.dispatchContender)
+            textvariable=self.createButtonText, command=self.dispatchContender)
 
         self.deleteButton.configure(
             text="Delete", command=self.deleteContender)
@@ -130,6 +133,8 @@ class UserForm(tkinter.Frame):
         message = ""
         if (self.tempContender is None):
             response = self.cursor.addContender(contender=contender)
+            self.docMaker.createTicket(contender=contender)
+            self.docMaker.createAppreciationCertificate(contender=contender)
             message = "Contender added!"
         else:
             response = self.cursor.updateContender(
@@ -159,7 +164,7 @@ class UserForm(tkinter.Frame):
         response = self.cursor.deleteContender(id)
         if (response):
             messagebox.showinfo(message="Contender deleted")
-            self.master.showFrame("Dashboard")
+            self.onBlur()
         else:
             messagebox.showinfo(message="An error ocurred!")
 
@@ -206,9 +211,11 @@ class UserForm(tkinter.Frame):
 
     def onFocus(self):
         if (self.tempContender is None):
+            self.createButtonText.set("Add")
             self.deleteButton.grid_forget()
             return
 
+        self.createButtonText.set("Update")
         self.deleteButton.grid(column=3, row=0, padx=5)
         nameArr = self.tempContender[1].split()
         self.nameEntry.insert(0, nameArr[0])
