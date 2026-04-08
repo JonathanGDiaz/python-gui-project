@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
-from LogIn import LogIn
-from Dashboard import Dashboard
-from UserForm import UserForm
-from Winners import Winners
+from ui.login_view import LogIn
+from ui.dashboard_view import Dashboard
+from ui.userform_view import UserForm
+from ui.winners_view import Winners
 
 
 class Application(tk.Tk):

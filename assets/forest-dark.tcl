@@ -3,7 +3,7 @@
 
 # The Forest theme is a beautiful and modern ttk theme inspired by Excel.
 
-package require Tk 8.6
+package require Tk 9.0
 
 namespace eval ttk::theme::forest-dark {
 

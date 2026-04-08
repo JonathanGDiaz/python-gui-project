@@ -1,4 +1,8 @@
 test.py
 .vscode
 __pycache__
+.venv
 temp
+documents/certificates/*
+documents/winners/*
+documents/tickets/*

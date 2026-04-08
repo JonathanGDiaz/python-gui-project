@@ -1,8 +1,8 @@
 import tkinter
 from tkinter import messagebox
 from tkinter import ttk as tk
-from Cursor import Cursor
-from Document import Document
+from services.data_service import Cursor
+from services.document_service import Document
 
 
 class UserForm(tkinter.Frame):

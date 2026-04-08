@@ -1,8 +1,8 @@
 import tkinter
 from tkinter import ttk as tk
-from Cursor import Cursor
-from LogIn import customEntry
-from Document import Document
+from services.data_service import Cursor
+from ui.components.button import CustomEntry
+from services.document_service import Document
 
 class Winners (tkinter.Frame):
     def __init__(self, master):
@@ -21,7 +21,7 @@ class Winners (tkinter.Frame):
         self.treeView = tk.Treeview(self.treeFrame)
         self.scrollbar = tk.Scrollbar(self.treeFrame)
         self.searchFrame = tk.Frame(self)
-        self.searchBar = customEntry(self.searchFrame, isPassword=False, placeHolder="Search by name")
+        self.searchBar = CustomEntry(self.searchFrame, isPassword=False, placeHolder="Search by name")
         self.searchButton = tk.Button(self.searchFrame)
         self.widgetsConfig()
         return
