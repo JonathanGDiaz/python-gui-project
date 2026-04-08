@@ -10,19 +10,21 @@ class Cursor ():
         return connection
 
     def logIn(self, credentials):
-        getUserQuery = f'''
-        SELECT * FROM users WHERE email = '{credentials["email"]}'
-        '''
+        getUserQuery = "SELECT * FROM users WHERE email = ?"
+
         try:
             conn = self.createConnection()
             cursor = conn.cursor()
-            cursor.execute(getUserQuery)
+            cursor.execute(getUserQuery, (credentials["email"],))
             user = cursor.fetchone()
+            conn.close()
+
             if (user is None):
                 return False
             if (user[2] != credentials["password"]):
                 return False
             return True
+        
         except Exception as ex:
             return False
 
@@ -31,23 +33,24 @@ class Cursor ():
         fLastName = contender["firstLastName"]
         sLastName = contender["secondLastName"]
         name = f'{fName} {fLastName} {sLastName}'
-        addContenderQuery = f'''
-        INSERT INTO contenders (name, age, curp, gender, address, school, category, payment)
-        VALUES (
-        '{name}',
-        {contender["age"]},
-        '{contender["curp"]}',
-        '{contender["gender"]}',
-        '{contender["address"]}',
-        '{contender["school"]}',
-        '{contender["category"]}',
-        {contender["payment"][0:4]}
-        );
-        '''
+        addContenderQuery =  """
+            INSERT INTO contenders 
+            (name, age, curp, gender, address, school, category, payment)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            """
         try:
             conn = self.createConnection()
             cursor = conn.cursor()
-            cursor.execute(addContenderQuery)
+            cursor.execute(addContenderQuery, (
+                name,
+                contender["age"],
+                contender["curp"],
+                contender["gender"],
+                contender["address"],
+                contender["school"],
+                contender["category"],
+                contender["payment"]
+            ))
             conn.commit()
             conn.close()
             return True
@@ -60,22 +63,31 @@ class Cursor ():
         fLastName = contender["firstLastName"]
         sLastName = contender["secondLastName"]
         name = f'{fName} {fLastName} {sLastName}'
-        updateContenderQuery = f'''
-        UPDATE contenders SET 
-        name = '{name}',
-        age = {contender["age"]},
-        curp = '{contender["curp"]}',
-        gender = '{contender["gender"]}',
-        address = '{contender["address"]}',
-        school = '{contender["school"]}',
-        category = '{contender["category"]}',
-        payment = {contender["payment"][0:4]}
-        WHERE id = {id}
+        updateContenderQuery = '''UPDATE contenders SET 
+        name = ?,
+        age = ?,
+        curp = ?,
+        gender = ?,
+        address = ?,
+        school = ?,
+        category = ?,
+        payment = ?
+        WHERE id = ?
         '''
         try:
             conn = self.createConnection()
             cursor = conn.cursor()
-            cursor.execute(updateContenderQuery)
+            cursor.execute(updateContenderQuery, (
+                name,
+                contender["age"],
+                contender["curp"],
+                contender["gender"],
+                contender["address"],
+                contender["school"],
+                contender["category"],
+                contender["payment"],
+                id
+            ))
             conn.commit()
             conn.close()
             return True
@@ -84,9 +96,7 @@ class Cursor ():
             return False
 
     def getContenders(self):
-        getContendersQuery = '''
-        SELECT * FROM contenders
-        '''
+        getContendersQuery = "SELECT * FROM contenders"
 
         try:
             conn = self.createConnection()
@@ -99,13 +109,11 @@ class Cursor ():
             print(ex)
 
     def deleteContender(self, id):
-        deleteContenderQuery = f'''
-        DELETE FROM contenders WHERE id = {id}
-        '''
+        deleteContenderQuery = "DELETE FROM contenders WHERE id = ?"
         try:
             conn = self.createConnection()
             cursor = conn.cursor()
-            cursor.execute(deleteContenderQuery)
+            cursor.execute(deleteContenderQuery, (id,))
             conn.commit()
             conn.close()
             return True
@@ -114,12 +122,11 @@ class Cursor ():
             return False
 
     def searchContender(self, query):
-        searchQuery = f'''
-        SELECT * FROM contenders WHERE name LIKE ?
-        '''
+        searchQuery = "SELECT * FROM contenders WHERE name LIKE ? ESCAPE '\\'"
         try:
             conn = self.createConnection()
             cursor = conn.cursor()
+            query = query.replace("%", r"\%").replace("_", r"\_")
             cursor.execute(searchQuery, ("%" + query + "%",))
             result = cursor.fetchall()
             conn.close()
@@ -132,16 +139,16 @@ class Cursor ():
         try:
             conn = self.createConnection()
             cursor = conn.cursor()
+
+
             if query is None:
-                filterQuery = f'''
-                SELECT * FROM contenders WHERE category = "{filter}"
-                '''
-                cursor.execute(filterQuery)
+                filterQuery = "SELECT * FROM contenders WHERE category = ?"
+
+                cursor.execute(filterQuery, (filter,))
             else:
-                filterQuery = f'''
-                SELECT * FROM contenders WHERE name LIKE ? AND category = "{filter}"
-                '''
-                cursor.execute(filterQuery, ("%" + query + "%",))
+                filterQuery = "SELECT * FROM contenders WHERE name LIKE ? ESCAPE '\\' AND category = ?"
+                query = query.replace("%", r"\%").replace("_", r"\_")
+                cursor.execute(filterQuery, ("%" + query + "%", filter))
             result = cursor.fetchall()
             conn.close()
             return result
