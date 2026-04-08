@@ -72,7 +72,7 @@ class UserForm(tkinter.Frame):
             text="User form", font=("forest-dark", 30, "bold"))
 
         self.goBackButton.configure(
-            text="Go back", command=self.onBlur)
+            text="Go back", command=self.cleanUp)
 
         self.createButton.configure(
             textvariable=self.createButtonText, command=self.dispatchContender)
@@ -88,17 +88,14 @@ class UserForm(tkinter.Frame):
 
         self.ageLabel.configure(text="Age*")
         ageValidation = self.register(self.validateAge)
-        self.ageEntry.configure(validate="key", validatecommand=(
-            ageValidation, "%P"))
+        self.ageEntry.configure(validate="key", validatecommand=(ageValidation, "%P"))
 
         self.curpLabel.configure(text="Curp*")
         self.curpValidation = self.register(self.validateCurp)
-        self.curpEntry.configure(
-            validate="key", validatecommand=(self.curpValidation, "%P"))
+        self.curpEntry.configure(validate="key", validatecommand=(self.curpValidation, "%P"))
 
         self.genderLabel.configure(text="Gender*")
-        self.genderComboBox.configure(
-            values=["Male", "Female"])
+        self.genderComboBox.configure(values=["Male", "Female", "Other"])
 
         self.addressLabel.configure(text="Address*")
 
@@ -129,6 +126,25 @@ class UserForm(tkinter.Frame):
             "category": self.categoryComboBox.get(),
             "payment": self.price.get(),
         }
+        print()
+        if len(contender["curp"]) != 18:
+            messagebox.showerror(message="CURP invalid")
+            return
+        
+        if contender["gender"] not in ["Male", "Female", "Other"]:
+            messagebox.showerror(message="Choose a valid value for gender")
+            return
+        
+        if contender["category"] not in ["Advanced", "Intermediate", "Novice"]:
+            messagebox.showerror(message="Choose a valid value for category")
+            return
+
+        required_fields = ["name", "firstLastName", "age", "curp", "address", "school", "category"]
+        
+        if any(contender[field] == "" for field in required_fields):
+            messagebox.showerror(message="Please fill in all required fields")
+            return
+
         response = None
         message = ""
         if (self.tempContender is None):
@@ -143,17 +159,7 @@ class UserForm(tkinter.Frame):
 
         if (response):
             messagebox.showinfo(message=message)
-            self.nameEntry.delete(0, "end")
-            self.lastNameEntry.delete(0, "end")
-            self.secondLastNameEntry.delete(0, "end")
-            self.ageEntry.delete(0, "end")
-            self.curpEntry.delete(0, "end")
-            self.genderComboBox.delete(0, "end")
-            self.addressEntry.delete(0, "end")
-            self.schoolEntry.delete(0, "end")
-            self.categoryComboBox.delete(0, "end")
-            self.price.set("Category not selected")
-            self.master.showFrame("Dashboard")
+            self.cleanUp()
         else:
             messagebox.showerror(message="There was an error!")
 
@@ -164,7 +170,7 @@ class UserForm(tkinter.Frame):
         response = self.cursor.deleteContender(id)
         if (response):
             messagebox.showinfo(message="Contender deleted")
-            self.onBlur()
+            self.cleanUp()
         else:
             messagebox.showinfo(message="An error ocurred!")
 
@@ -190,7 +196,7 @@ class UserForm(tkinter.Frame):
         return
 
     # Render functions
-    def onBlur(self):
+    def cleanUp(self):
         self.nameEntry.delete(0, "end")
         self.lastNameEntry.delete(0, "end")
         self.secondLastNameEntry.delete(0, "end")
@@ -214,13 +220,12 @@ class UserForm(tkinter.Frame):
             self.createButtonText.set("Add")
             self.deleteButton.grid_forget()
             return
-
         self.createButtonText.set("Update")
         self.deleteButton.grid(column=3, row=0, padx=5)
         nameArr = self.tempContender[1].split()
         self.nameEntry.insert(0, nameArr[0])
         self.lastNameEntry.insert(0, nameArr[1])
-        self.secondLastNameEntry.insert(0, nameArr[2])
+        self.secondLastNameEntry.insert(0, nameArr[2] if len(nameArr) > 2 else "")
         self.ageEntry.insert(0, self.tempContender[2])
         self.curpEntry.insert(0, self.tempContender[3])
         self.genderComboBox.insert(0, self.tempContender[4])

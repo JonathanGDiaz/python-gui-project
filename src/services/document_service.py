@@ -48,8 +48,7 @@ class Document():
         c.setFont("Bold", 45)
         c.drawString(150, 300, "Appreciation certificate")
         c.setFont("Bold", 25)
-        c.drawString(self.__centerX("Thank you for participating!", "Bold", 25, c),
-                     250, "Thank you for participating!")
+        c.drawString(self.__centerX("Thank you for participating!", "Bold", 25, c),250, "Thank you for participating!")
 
         c.setFont("Regular", 22)
         c.drawString(self.__centerX(names[0],
@@ -71,18 +70,14 @@ class Document():
         c.drawImage(image, 300, 350, 200, 200)
 
         c.setFont("Bold", 45)
-        c.drawString(self.__centerX("Winner certificate",
-                     "Bold", 45, c), 300, "Winner certificate")
+        c.drawString(self.__centerX("Winner certificate","Bold", 45, c), 300, "Winner certificate")
 
         c.setFont("Bold", 25)
-        c.drawString(self.__centerX(f'Congratulations in obtaining {place}', "Bold", 25, c),
-                     250, f'Congratulations in obtaining {place}')
+        c.drawString(self.__centerX(f'Congratulations in obtaining {place}', "Bold", 25, c), 250, f'Congratulations in obtaining {place}')
 
         c.setFont("Regular", 22)
-        c.drawString(self.__centerX("In the intermediate tourney", "Regular",
-                                    22, c), 210, "In the intermediate tourney")
-        c.drawString(self.__centerX(names[0],
-                                    "Regular", 22, c), 170, names[0])
+        c.drawString(self.__centerX("In the intermediate tourney", "Regular", 22, c), 210, "In the intermediate tourney")
+        c.drawString(self.__centerX(names[0],"Regular", 22, c), 170, names[0])
 
         c.rect(50, 50, landscape(letter)[0] - 100, landscape(letter)[1] - 100)
         c.rect(25, 25, landscape(letter)[0] - 50, landscape(letter)[1] - 50)
@@ -98,5 +93,5 @@ class Document():
         fLastName = contender["firstLastName"]
         sLastName = contender["secondLastName"]
         name = f'{fName} {fLastName} {sLastName}'
-        pdfName = f'{fName[0].upper()}{fLastName[0].upper()}{sLastName[0].upper()}_{contender["category"]}.pdf'
+        pdfName = f'{name.upper()}_{contender["category"]}.pdf'
         return (name, pdfName)
